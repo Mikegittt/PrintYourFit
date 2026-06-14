@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: print-your-fit-backend
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    workingDirectory: pyf-backend
+    envVars:
+      - key: DATABASE_URL
+        fromSecret: DATABASE_URL
+      - key: SECRET_KEY
+        fromSecret: SECRET_KEY
+      - key: CLOUDINARY_CLOUD_NAME
+        fromSecret: CLOUDINARY_CLOUD_NAME
+      - key: CLOUDINARY_API_KEY
+        fromSecret: CLOUDINARY_API_KEY
+      - key: CLOUDINARY_API_SECRET
+        fromSecret: CLOUDINARY_API_SECRET
+      - key: PAYSTACK_SECRET_KEY
+        fromSecret: PAYSTACK_SECRET_KEY
+      - key: PAYSTACK_BASE_URL
+        fromSecret: PAYSTACK_BASE_URL
+      - key: VTPASS_API_KEY
+        fromSecret: VTPASS_API_KEY
+      - key: VTPASS_URL
+        fromSecret: VTPASS_URL
+      - key: DEFAULT_PRINT_SHOP_ID
+        fromSecret: DEFAULT_PRINT_SHOP_ID
