@@ -2,7 +2,7 @@ services:
   - type: web
     name: print-your-fit-backend
     env: python
-    pythonVersion: 3.11
+    pythonVersion: "3.11.9"
     region: oregon
     plan: free
     branch: main
