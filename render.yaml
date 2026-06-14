@@ -2,10 +2,11 @@ services:
   - type: web
     name: print-your-fit-backend
     env: python
+    pythonVersion: 3.11
     region: oregon
     plan: free
     branch: main
-    buildCommand: pip install --only-binary :all: -r requirements.txt
+    buildCommand: pip install --no-cache-dir -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     workingDirectory: pyf-backend
     envVars:
