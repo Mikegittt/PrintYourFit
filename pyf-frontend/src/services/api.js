@@ -25,7 +25,8 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('pyf_refresh_token')
       if (refreshToken) {
         try {
-          const refresh = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1'}/auth/refresh`, {
+          const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://printyourfit.onrender.com/api/v1'
+          const refresh = await axios.post(`${baseUrl}/auth/refresh`, {
             refresh_token: refreshToken,
           })
           localStorage.setItem('pyf_access_token', refresh.data.access_token)
