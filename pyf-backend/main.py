@@ -34,7 +34,10 @@ async def ensure_cors_headers(request: Request, call_next):
 @app.exception_handler(Exception)
 async def all_exception_handler(request: Request, exc: Exception):
     traceback.print_exc()
-    response = JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+    content = {"detail": "Internal Server Error"}
+    if settings.DEBUG:
+        content["error"] = str(exc)
+    response = JSONResponse(status_code=500, content=content)
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "*"
