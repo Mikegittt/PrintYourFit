@@ -10,11 +10,6 @@ import app.models
 
 app = FastAPI(title="Print Your Fit API", version="0.1.0")
 
-@app.exception_handler(Exception)
-async def all_exception_handler(request: Request, exc: Exception):
-    traceback.print_exc()
-    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -30,6 +25,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def all_exception_handler(request: Request, exc: Exception):
+    traceback.print_exc()
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+
 app.include_router(api_router, prefix="/api/v1")
 
 @app.on_event("startup")
