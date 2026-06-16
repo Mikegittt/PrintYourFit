@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import NotificationBell from './NotificationBell'
 
 export default function Layout({ children }) {
   const { user, logout } = useAuth()
@@ -10,7 +11,7 @@ export default function Layout({ children }) {
       <header className="relative z-10 border-b border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-soft-xl">
         <div className="mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between max-w-6xl px-4 py-4">
           <Link to="/" className="text-xl font-semibold tracking-tight text-white">Print Your Fit</Link>
-          <nav className="flex flex-wrap justify-center gap-3 text-sm text-slate-300 md:justify-end">
+          <nav className="flex flex-wrap justify-center gap-3 text-sm text-slate-300 md:justify-end items-center">
             <Link to="/">Home</Link>
             {user ? (
               <>
@@ -18,6 +19,7 @@ export default function Layout({ children }) {
                 <Link to="/design-studio">AI Designer</Link>
                 <Link to="/kyc">KYC</Link>
                 <Link to="/wallet">Wallet</Link>
+                <NotificationBell />
                 {user.role === 'ADMIN' && <Link to="/admin/orders" className="transition hover:text-white">Admin</Link>}
               </>
             ) : (

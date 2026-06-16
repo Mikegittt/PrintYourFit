@@ -15,6 +15,7 @@ import OrderDetail from './pages/OrderDetail'
 import AIDesigner from './pages/AIDesigner'
 import AdminOrders from './pages/AdminOrders'
 import AdminShops from './pages/AdminShops'
+import AdminUsers from './pages/AdminUsers'
 import AdminAccess from './pages/AdminAccess'
 import AdminGate from './routes/AdminGate'
 import KYC from './pages/KYC'
@@ -47,6 +48,7 @@ function App() {
         <Route path="/admin" element={<AdminAccess />} />
         <Route path="/admin/orders" element={<AdminGate><AdminOrders /></AdminGate>} />
         <Route path="/admin/shops" element={<AdminGate><AdminShops /></AdminGate>} />
+        <Route path="/admin/users" element={<AdminGate><AdminUsers /></AdminGate>} />
         <Route path="*" element={<Navigate to={user ? '/dashboard' : '/'} />} />
       </Routes>
     </Layout>
