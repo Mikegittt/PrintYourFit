@@ -52,4 +52,5 @@ def create_tokens(user: dict) -> dict:
         "access_token": create_access_token(subject=str(user["id"]), extra_claims=extra_claims),
         "refresh_token": create_refresh_token(subject=str(user["id"]), extra_claims=extra_claims),
         "token_type": "bearer",
+        "id": str(user["id"]),
     }
