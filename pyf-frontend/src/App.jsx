@@ -15,6 +15,8 @@ import OrderDetail from './pages/OrderDetail'
 import AIDesigner from './pages/AIDesigner'
 import AdminOrders from './pages/AdminOrders'
 import AdminShops from './pages/AdminShops'
+import AdminAccess from './pages/AdminAccess'
+import AdminGate from './routes/AdminGate'
 import KYC from './pages/KYC'
 import ProtectedRoute from './routes/ProtectedRoute'
 import Layout from './components/Layout'
@@ -42,8 +44,9 @@ function App() {
         <Route path="/shop/queue" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><ShopQueue /></ProtectedRoute>} />
         <Route path="/shop/onboard" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><PrintShopOnboarding /></ProtectedRoute>} />
         <Route path="/shop/onboard/verify" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><PrintShopVerify /></ProtectedRoute>} />
-        <Route path="/admin/orders" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminOrders /></ProtectedRoute>} />
-        <Route path="/admin/shops" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminShops /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminAccess />} />
+        <Route path="/admin/orders" element={<AdminGate><AdminOrders /></AdminGate>} />
+        <Route path="/admin/shops" element={<AdminGate><AdminShops /></AdminGate>} />
         <Route path="*" element={<Navigate to={user ? '/dashboard' : '/'} />} />
       </Routes>
     </Layout>
