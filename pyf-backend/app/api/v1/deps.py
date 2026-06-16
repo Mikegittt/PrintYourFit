@@ -4,6 +4,10 @@ from app.core.security import decode_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+async def get_db():
+    """Stub database session - routes should not rely on DB"""
+    return None
+
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     try:
         payload = decode_token(token)
