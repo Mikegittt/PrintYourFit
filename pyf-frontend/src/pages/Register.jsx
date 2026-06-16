@@ -32,8 +32,8 @@ export default function Register() {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[0.95fr_0.85fr]">
-      <div className="glass-card p-10">
+    <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.95fr_0.85fr]">
+      <div className="glass-card p-6 sm:p-10">
         <p className="text-sm uppercase tracking-[0.3em] text-indigo-200">Create your account</p>
         <h1 className="mt-4 text-4xl font-semibold text-white">Join Print Your Fit</h1>
         <p className="mt-4 max-w-xl text-slate-300">
@@ -50,7 +50,7 @@ export default function Register() {
           </div>
         </div>
       </div>
-      <div className="glass-card p-10">
+      <div className="glass-card p-6 sm:p-10">
         <form className="space-y-6" onSubmit={submit}>
           <div>
             <label className="text-sm font-medium text-slate-200">Full name</label>

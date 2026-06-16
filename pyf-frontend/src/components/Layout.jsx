@@ -8,9 +8,9 @@ export default function Layout({ children }) {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.24),_transparent_45%)] blur-3xl" />
       <div className="pointer-events-none absolute right-0 top-24 h-96 w-96 rounded-full bg-purple-500/10 blur-3xl" />
       <header className="relative z-10 border-b border-white/10 bg-slate-950/75 backdrop-blur-xl shadow-soft-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between max-w-6xl px-4 py-4">
           <Link to="/" className="text-xl font-semibold tracking-tight text-white">Print Your Fit</Link>
-          <nav className="flex flex-wrap items-center gap-4 text-sm text-slate-300">
+          <nav className="flex flex-wrap justify-center gap-3 text-sm text-slate-300 md:justify-end">
             <Link to="/">Home</Link>
             {user ? (
               <>

@@ -21,7 +21,11 @@ export default function AIDesigner() {
   async function loadDesigns() {
     try {
       const res = await api.get('/designs/my-designs')
-      setDesigns(res.data || [])
+      const list = res.data || []
+      setDesigns(list)
+      if (list.length && !selectedDesign) {
+        setSelectedDesign(list[0])
+      }
     } catch (e) {
       // ignore
     }
@@ -103,8 +107,8 @@ export default function AIDesigner() {
         <p className="mt-2 text-slate-300">Describe your design idea in detail, and our AI will generate it for you.</p>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[1.75fr_1fr]">
+        <div className="space-y-6">
           <section className="glass-card p-6">
             <label className="text-sm font-medium text-slate-200">Your design prompt</label>
             <textarea
@@ -126,21 +130,25 @@ export default function AIDesigner() {
             <section className="glass-card p-6">
               <p className="text-sm uppercase tracking-[0.24em] text-cyan-200">Generated Design</p>
               <div className="mt-4 rounded-lg overflow-hidden bg-slate-950/60">
-                {selectedDesign.image_url && (
-                  <img src={selectedDesign.image_url} alt="Generated design" className="w-full" />
-                )}
-              </div>
-              <p className="mt-4 text-sm text-slate-400 font-mono">{selectedDesign.prompt}</p>
+                  {selectedDesign.image_url ? (
+                    <img src={selectedDesign.image_url} alt="Generated design" className="w-full h-[320px] object-cover" />
+                  ) : (
+                    <div className="flex min-h-[240px] items-center justify-center border border-dashed border-slate-700 text-slate-500">
+                      No preview available
+                    </div>
+                  )}
+                </div>
+                <p className="mt-4 text-sm text-slate-400 font-mono break-words">{selectedDesign.prompt}</p>
 
-              <div className="mt-6 space-y-3">
-                <p className="text-sm font-medium text-slate-200">Export as:</p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="mt-6 space-y-3">
+                  <p className="text-sm font-medium text-slate-200">Export as:</p>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {['PNG', 'JPEG', 'WebP', 'SVG'].map((fmt) => (
                     <LoadingButton
                       key={fmt}
                       onClick={() => exportDesign(fmt)}
                       loading={exporting === fmt}
-                      className="text-xs bg-slate-800/70 text-white"
+                      className="w-full text-xs bg-slate-800/70 text-white"
                     >
                       {fmt}
                     </LoadingButton>
@@ -155,7 +163,11 @@ export default function AIDesigner() {
           <section className="glass-card p-6">
             <p className="text-sm uppercase tracking-[0.24em] text-rose-200">Recent Designs</p>
             <div className="mt-4 space-y-2 max-h-96 overflow-y-auto">
-              {designs.length === 0 && <p className="text-slate-400">No designs yet.</p>}
+              {designs.length === 0 && (
+                <div className="rounded-3xl border border-dashed border-slate-800/60 bg-slate-900/80 p-5 text-slate-400">
+                  No designs yet. Use the prompt above to generate a custom print design.
+                </div>
+              )}
               {designs.map((d) => (
                 <button
                   key={d.id}
@@ -178,8 +190,8 @@ export default function AIDesigner() {
               <p className="text-sm uppercase tracking-[0.24em] text-cyan-200">Send to Printer</p>
               <div className="mt-4 space-y-3">
                 <select
-                  value={selectedShop?.id || ''}
-                  onChange={(e) => setSelectedShop(shops.find((s) => s.id === e.target.value))}
+                  value={selectedShop?.id ? String(selectedShop.id) : ''}
+                  onChange={(e) => setSelectedShop(shops.find((s) => String(s.id) === e.target.value))}
                   className="w-full rounded-lg bg-slate-900/60 px-3 py-2 text-slate-200 text-sm"
                 >
                   <option value="">Select a printer…</option>
@@ -189,6 +201,9 @@ export default function AIDesigner() {
                     </option>
                   ))}
                 </select>
+                {shops.length === 0 && (
+                  <p className="text-sm text-slate-400">No printers available yet. Check back after onboarding print shops.</p>
+                )}
                 <LoadingButton onClick={sendToPrinter} className="w-full bg-rose-500 text-white text-sm">
                   Send for Negotiation
                 </LoadingButton>

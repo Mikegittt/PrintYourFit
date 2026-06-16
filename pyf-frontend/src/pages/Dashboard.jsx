@@ -36,16 +36,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <section className="glass-card p-6 flex items-center justify-between">
+      <section className="glass-card p-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Welcome back</p>
           <h1 className="mt-2 text-3xl font-semibold text-white">{user?.full_name ?? 'Print Your Fit user'}</h1>
           <p className="mt-2 text-sm text-slate-300">Signed in as <span className="font-semibold text-white">{user?.role ?? 'USER'}</span></p>
         </div>
-        <div className="text-right">
+        <div className="text-left sm:text-right">
           <p className="text-sm text-slate-400">Wallet</p>
           <p className="mt-2 text-2xl font-semibold text-white">{balance ? `${balance.points} pts • ₦${balance.naira_value}` : '—'}</p>
-          <div className="mt-3 flex gap-3 justify-end">
+          <div className="mt-3 flex justify-start gap-3 sm:justify-end">
             <Link to="/wallet" className="rounded-full bg-indigo-500 px-4 py-2 text-sm font-semibold text-white">Open Wallet</Link>
           </div>
         </div>
@@ -53,12 +53,12 @@ export default function Dashboard() {
 
       <section className="grid gap-6 lg:grid-cols-3">
         <div className="glass-card p-6 lg:col-span-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-sm uppercase tracking-[0.24em] text-indigo-200">Discover</p>
               <h2 className="mt-2 text-2xl font-semibold text-white">Printing presses near you</h2>
             </div>
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search shops or address" className="ml-4 w-60 rounded-md bg-slate-900/60 px-3 py-2 text-sm text-slate-200" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search shops or address" className="ml-0 w-full max-w-md rounded-md bg-slate-900/60 px-3 py-2 text-sm text-slate-200 sm:ml-4" />
           </div>
 
           <div className="mt-6 space-y-3">
