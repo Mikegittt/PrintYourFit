@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 import re
+import ssl
 
 # Normalize DATABASE_URL for asyncpg and handle SSL via connect_args
 raw_db_url = str(settings.DATABASE_URL)
@@ -19,7 +20,8 @@ if "sslmode=" in db_url:
     # remove '?sslmode=...' or '&sslmode=...'
     db_url = re.sub(r'([&?])sslmode=[^&]*', lambda m: m.group(1) if m.group(1) == '&' else '?', db_url)
     db_url = re.sub(r'[?&]$', '', db_url)
-    connect_args["ssl"] = True
+    # Use an SSLContext instance for asyncpg
+    connect_args["ssl"] = ssl.create_default_context()
 
 engine: AsyncEngine = create_async_engine(
     db_url,
