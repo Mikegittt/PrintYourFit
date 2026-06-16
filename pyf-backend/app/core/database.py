@@ -30,7 +30,8 @@ async def _asyncpg_connect_wrapper(*args, **kwargs):
     kwargs.pop("channel_binding", None)
     return await asyncpg.connect(*args, **kwargs)
 
-connect_args.setdefault("creator", _asyncpg_connect_wrapper)
+# SQLAlchemy asyncpg dialect expects async_creator_fn, not creator
+connect_args.setdefault("async_creator_fn", _asyncpg_connect_wrapper)
 
 engine: AsyncEngine = create_async_engine(
     db_url,
