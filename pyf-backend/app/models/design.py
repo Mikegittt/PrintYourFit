@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import String, Column, Text, DateTime, LargeBinary
-from sqlalchemy.dialects.postgresql import UUID
+from app.core.types import GUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -8,8 +8,8 @@ from app.core.database import Base
 class Design(Base):
     __tablename__ = "designs"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), nullable=False, index=True)
     prompt = Column(Text, nullable=False)
     image_url = Column(String(512), nullable=True)  # URL or base64
     image_data = Column(LargeBinary, nullable=True)  # stored binary image

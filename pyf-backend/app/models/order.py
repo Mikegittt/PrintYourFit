@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import String, Column, ForeignKey, Integer, Numeric, Text, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from app.core.types import GUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -8,10 +8,10 @@ from app.core.database import Base
 class Order(Base):
     __tablename__ = "orders"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    customer_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    print_shop_id = Column(UUID(as_uuid=True), ForeignKey("print_shops.id"), nullable=False)
-    referred_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    customer_id = Column(GUID(), ForeignKey("users.id"), nullable=False)
+    print_shop_id = Column(GUID(), ForeignKey("print_shops.id"), nullable=False)
+    referred_by = Column(GUID(), ForeignKey("users.id"), nullable=True)
     product_type = Column(String(64), nullable=False)
     description = Column(Text, nullable=True)
     quantity = Column(Integer, nullable=False)

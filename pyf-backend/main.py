@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.api.v1.api import api_router
-from app.core.database import engine
+from app.core.database import engine, Base
 from app.core.config import settings
 import app.models
 from app.core.version_debug import get_versions
@@ -49,10 +49,15 @@ async def all_exception_handler(request: Request, exc: Exception):
 
 app.include_router(api_router, prefix="/api/v1")
 
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
 @app.on_event("startup")
 async def startup_event():
     if settings.DEBUG:
         print("Starting Print Your Fit API")
+    await create_tables()
 
 @app.get("/")
 async def root():

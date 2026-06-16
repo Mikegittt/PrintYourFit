@@ -1,6 +1,5 @@
 from alembic import op
 import sqlalchemy as sa
-import sqlalchemy.dialects.postgresql as pg
 
 revision = '0003'
 down_revision = '0002'
@@ -10,23 +9,23 @@ depends_on = None
 
 def upgrade():
     # users: add kyc columns
-    op.add_column('users', sa.Column('kyc_completed', sa.Boolean(), server_default=sa.text('false'), nullable=False))
-    op.add_column('users', sa.Column('kyc_completed_at', sa.TIMESTAMP(timezone=True), nullable=True))
+    op.add_column('users', sa.Column('kyc_completed', sa.Boolean(), server_default=sa.text('0'), nullable=False))
+    op.add_column('users', sa.Column('kyc_completed_at', sa.DateTime(timezone=True), nullable=True))
 
     # print_shops: add whatsapp_number, kyc columns, approved_at
     op.add_column('print_shops', sa.Column('whatsapp_number', sa.String(20), nullable=True))
-    op.add_column('print_shops', sa.Column('kyc_completed', sa.Boolean(), server_default=sa.text('false'), nullable=False))
-    op.add_column('print_shops', sa.Column('kyc_completed_at', sa.TIMESTAMP(timezone=True), nullable=True))
-    op.add_column('print_shops', sa.Column('approved_at', sa.TIMESTAMP(timezone=True), nullable=True))
+    op.add_column('print_shops', sa.Column('kyc_completed', sa.Boolean(), server_default=sa.text('0'), nullable=False))
+    op.add_column('print_shops', sa.Column('kyc_completed_at', sa.DateTime(timezone=True), nullable=True))
+    op.add_column('print_shops', sa.Column('approved_at', sa.DateTime(timezone=True), nullable=True))
 
     # notifications table
     op.create_table(
         'notifications',
-        sa.Column('id', pg.UUID(as_uuid=True), primary_key=True, server_default=sa.text('gen_random_uuid()')),
+        sa.Column('id', sa.String(36), primary_key=True),
         sa.Column('title', sa.String(200), nullable=False),
         sa.Column('message', sa.String(2000), nullable=False),
-        sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.Column('active', sa.Boolean(), server_default=sa.text('true'), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+        sa.Column('active', sa.Boolean(), server_default=sa.text('1'), nullable=False),
         sa.Column('source', sa.String(128), nullable=True),
     )
 

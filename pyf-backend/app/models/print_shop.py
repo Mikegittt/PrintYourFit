@@ -1,6 +1,6 @@
 import uuid
 from sqlalchemy import String, Column, ForeignKey, Boolean, DateTime, Text
-from sqlalchemy.dialects.postgresql import UUID
+from app.core.types import GUID
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
@@ -8,8 +8,8 @@ from app.core.database import Base
 class PrintShop(Base):
     __tablename__ = "print_shops"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    id = Column(GUID(), primary_key=True, default=uuid.uuid4)
+    user_id = Column(GUID(), ForeignKey("users.id"), nullable=False)
     shop_name = Column(String(128), nullable=False)
     address = Column(Text, nullable=False)
     state = Column(String(64), nullable=False)
