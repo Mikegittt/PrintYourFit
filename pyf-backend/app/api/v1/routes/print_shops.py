@@ -9,6 +9,8 @@ router = APIRouter()
 
 @router.post("/register", response_model=dict)
 async def register_shop(payload: dict, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unavailable")
     if current_user.role != "PRINT_SHOP":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only print shop users can register shops")
     shop = PrintShop(
@@ -25,6 +27,8 @@ async def register_shop(payload: dict, db: AsyncSession = Depends(get_db), curre
 
 @router.get("/", response_model=list[dict], dependencies=[Depends(require_role("ADMIN"))])
 async def list_print_shops(db: AsyncSession = Depends(get_db)):
+    if db is None:
+        return []
     result = await db.execute(select(PrintShop))
     shops = result.scalars().all()
     return [{"id": str(s.id), "shop_name": s.shop_name, "status": s.status, "created_at": str(s.created_at)} for s in shops]
@@ -32,6 +36,8 @@ async def list_print_shops(db: AsyncSession = Depends(get_db)):
 
 @router.get("/discover", response_model=list[dict])
 async def discover_print_shops(q: str | None = None, db: AsyncSession = Depends(get_db)):
+    if db is None:
+        return []
     # Public discovery endpoint: only APPROVED shops are returned
     stmt = select(PrintShop).where(PrintShop.status == "APPROVED")
     result = await db.execute(stmt)
@@ -47,12 +53,16 @@ async def discover_print_shops(q: str | None = None, db: AsyncSession = Depends(
 
 @router.get("/pending", response_model=list[dict], dependencies=[Depends(require_role("ADMIN"))])
 async def list_pending_shops(db: AsyncSession = Depends(get_db)):
+    if db is None:
+        return []
     result = await db.execute(select(PrintShop).where(PrintShop.status == "PENDING"))
     shops = result.scalars().all()
     return [{"id": str(s.id), "shop_name": s.shop_name, "address": s.address, "state": s.state, "status": s.status, "created_at": str(s.created_at)} for s in shops]
 
 @router.get("/{shop_id}", response_model=dict)
 async def get_print_shop(shop_id: str, db: AsyncSession = Depends(get_db)):
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unavailable")
     shop = await db.get(PrintShop, shop_id)
     if not shop:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Print shop not found")
@@ -60,6 +70,8 @@ async def get_print_shop(shop_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.put("/{shop_id}/approve", response_model=dict, dependencies=[Depends(require_role("ADMIN"))])
 async def approve_shop(shop_id: str, db: AsyncSession = Depends(get_db)):
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unavailable")
     shop = await db.get(PrintShop, shop_id)
     if not shop:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Print shop not found")
@@ -72,6 +84,8 @@ async def approve_shop(shop_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.put("/{shop_id}/reject", response_model=dict, dependencies=[Depends(require_role("ADMIN"))])
 async def reject_shop(shop_id: str, db: AsyncSession = Depends(get_db)):
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unavailable")
     shop = await db.get(PrintShop, shop_id)
     if not shop:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Print shop not found")
@@ -83,6 +97,8 @@ async def reject_shop(shop_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.put("/{shop_id}/verify", response_model=dict, dependencies=[Depends(require_role("ADMIN"))])
 async def verify_shop(shop_id: str, db: AsyncSession = Depends(get_db)):
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unavailable")
     shop = await db.get(PrintShop, shop_id)
     if not shop:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Print shop not found")
