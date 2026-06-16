@@ -7,6 +7,7 @@ from app.api.v1.api import api_router
 from app.core.database import engine
 from app.core.config import settings
 import app.models
+from app.core.version_debug import get_versions
 
 app = FastAPI(title="Print Your Fit API", version="0.1.0")
 
@@ -56,3 +57,10 @@ async def startup_event():
 @app.get("/")
 async def root():
     return {"message": "Print Your Fit API is running"}
+
+# Temporary debug endpoint to report installed package versions (only enabled in DEBUG mode)
+@app.get("/_debug/versions")
+async def versions():
+    if not settings.DEBUG:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return get_versions()
