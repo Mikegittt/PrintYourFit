@@ -16,7 +16,10 @@ async def generate_image_from_prompt(prompt: str, num_inference_steps: int = 50)
     """
     try:
         if not HF_API_TOKEN:
-            print("Image generation error: Hugging Face API token is not configured")
+            print("Image generation error: HF_API_TOKEN is not configured. Set it in .env or Render environment variables.")
+            return None
+        if not HF_MODEL:
+            print("Image generation error: HF_MODEL is not configured. Expected value like 'stabilityai/stable-diffusion-2'")
             return None
 
         url = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
