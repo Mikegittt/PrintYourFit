@@ -10,7 +10,7 @@ Location: `pyf-backend`
 
 1. Create a Python virtual environment.
 2. Install dependencies: `pip install -r requirements.txt`
-3. Copy `.env.example` to `.env` and set your PostgreSQL, Cloudinary, Paystack, and VTPass credentials.
+3. Copy `.env.example` to `.env` and set your SQLite, Cloudinary, Paystack, and VTPass credentials.
 4. Run Alembic migrations:
    - `alembic upgrade head`
 5. Start the app:
@@ -28,7 +28,7 @@ Location: `pyf-frontend`
 
 ## Architecture
 
-- Backend: FastAPI, SQLAlchemy async ORM, PostgreSQL, JWT auth, Cloudinary uploads, Paystack integration.
+- Backend: FastAPI, SQLAlchemy async ORM, SQLite, JWT auth, Cloudinary uploads, Paystack integration.
 - Frontend: React, Vite, Tailwind CSS, protected routes, Axios with refresh behavior.
 
 ## Notes
