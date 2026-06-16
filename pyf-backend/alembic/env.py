@@ -41,10 +41,10 @@ def do_run_migrations(connection: Connection):
         context.run_migrations()
 
 async def run_async_migrations():
-    connectable = create_async_engine(settings.DATABASE_URL, poolclass=pool.NullPool)
+    # reuse the application's engine which normalizes the DATABASE_URL and applies SSL/connect args
+    from app.core.database import engine as connectable
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
-    await connectable.dispose()
 
 if context.is_offline_mode():
     run_migrations_offline()
