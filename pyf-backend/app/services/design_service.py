@@ -20,19 +20,29 @@ async def generate_image_from_prompt(prompt: str, num_inference_steps: int = 50)
             return None
 
         url = f"https://api-inference.huggingface.co/models/{HF_MODEL}"
-        headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
+        headers = {
+            "Authorization": f"Bearer {HF_API_TOKEN}",
+            "Accept": "image/png",
+        }
+        # include wait_for_model option to reduce transient failures
         payload = {
             "inputs": prompt,
+            "options": {"wait_for_model": True},
             "num_inference_steps": num_inference_steps,
         }
 
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             response = await client.post(url, json=payload, headers=headers)
-            if response.status_code == 200:
+            content_type = response.headers.get("content-type", "")
+            if response.status_code == 200 and content_type.startswith("image"):
                 return response.content  # bytes
-            else:
-                print(f"HF API error: {response.status_code} {response.text}")
-                return None
+            # If HF returns JSON with error details, log it for easier debugging
+            try:
+                txt = response.text
+            except Exception:
+                txt = '<unreadable response>'
+            print(f"HF API error: status={response.status_code} content-type={content_type} body={txt}")
+            return None
     except Exception as e:
         print(f"Image generation error: {e}")
         return None
