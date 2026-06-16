@@ -14,11 +14,11 @@ if db_url.startswith("postgres://"):
 elif db_url.startswith("postgresql://") and "+asyncpg" not in db_url:
     db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-# Remove psycopg-style sslmode query param (asyncpg doesn't accept sslmode)
+# Remove psycopg-style sslmode and channel_binding query params (asyncpg doesn't accept them)
 connect_args = {}
-if "sslmode=" in db_url:
-    # remove '?sslmode=...' or '&sslmode=...'
+if "sslmode=" in db_url or "channel_binding=" in db_url:
     db_url = re.sub(r'([&?])sslmode=[^&]*', lambda m: m.group(1) if m.group(1) == '&' else '?', db_url)
+    db_url = re.sub(r'([&?])channel_binding=[^&]*', lambda m: m.group(1) if m.group(1) == '&' else '?', db_url)
     db_url = re.sub(r'[?&]$', '', db_url)
     connect_args["ssl"] = ssl.create_default_context()
 
