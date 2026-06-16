@@ -1,48 +1,55 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.models.user import User
+from datetime import datetime
+from uuid import UUID, uuid4
+from typing import Optional
 from app.core.security import get_password_hash, verify_password, create_access_token, create_refresh_token, build_referral_code
 from app.schemas.auth import RegisterRequest, LoginRequest
-from uuid import UUID
 
-async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
-    result = await db.execute(select(User).where(User.email == email))
-    return result.scalars().first()
+_users: dict[str, dict] = {}
 
-async def get_user(db: AsyncSession, user_id: UUID) -> User | None:
-    return await db.get(User, user_id)
+async def get_user_by_email(email: str) -> dict | None:
+    return _users.get(email.lower())
 
-async def create_user(db: AsyncSession, user_in: RegisterRequest) -> User:
-    referral = build_referral_code() if user_in.role == "AMBASSADOR" else None
-    user = User(
-        full_name=user_in.full_name,
-        email=user_in.email,
-        hashed_password=get_password_hash(user_in.password),
-        role=user_in.role,
-        target_campus=user_in.target_campus,
-        referral_code=referral,
-    )
-    if user_in.referral_code:
-        referrer = await db.execute(select(User).where(User.referral_code == user_in.referral_code))
-        referrer = referrer.scalars().first()
-        if referrer:
-            user.referred_by = referrer.id
-    db.add(user)
-    await db.commit()
-    await db.refresh(user)
+async def create_user(user_in: RegisterRequest) -> dict:
+    if await get_user_by_email(user_in.email):
+        raise ValueError("Email already registered")
+
+    user_id = uuid4()
+    user = {
+        "id": user_id,
+        "full_name": user_in.full_name,
+        "email": user_in.email,
+        "hashed_password": get_password_hash(user_in.password),
+        "role": user_in.role,
+        "target_campus": user_in.target_campus,
+        "referral_code": build_referral_code() if user_in.role == "AMBASSADOR" else None,
+        "referred_by": None,
+        "is_active": True,
+        "created_at": datetime.utcnow().isoformat(),
+    }
+    _users[user_in.email.lower()] = user
     return user
 
-async def authenticate_user(db: AsyncSession, login_in: LoginRequest) -> User | None:
-    user = await get_user_by_email(db, login_in.email)
+async def authenticate_user(login_in: LoginRequest) -> dict | None:
+    user = await get_user_by_email(login_in.email)
     if not user:
         return None
-    if not verify_password(login_in.password, user.hashed_password):
+    if not verify_password(login_in.password, user["hashed_password"]):
         return None
     return user
 
-def create_tokens(user_id: str) -> dict:
+def create_tokens(user: dict) -> dict:
+    extra_claims = {
+        "full_name": user["full_name"],
+        "email": user["email"],
+        "role": user["role"],
+        "target_campus": user["target_campus"],
+        "referral_code": user["referral_code"],
+        "referred_by": user["referred_by"],
+        "is_active": user["is_active"],
+        "created_at": user["created_at"],
+    }
     return {
-        "access_token": create_access_token(subject=user_id),
-        "refresh_token": create_refresh_token(subject=user_id),
+        "access_token": create_access_token(subject=str(user["id"]), extra_claims=extra_claims),
+        "refresh_token": create_refresh_token(subject=str(user["id"]), extra_claims=extra_claims),
         "token_type": "bearer",
     }
