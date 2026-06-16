@@ -33,7 +33,7 @@ async def generate_design(payload: DesignCreate, db: AsyncSession = Depends(get_
     if db is None:
         # try to coerce user id to UUID, fallback to random UUID
         try:
-            user_uuid = UUID(getattr(current_user, "id", None) or current_user.get("id") or current_user.get("sub"))
+            user_uuid = UUID(str(current_user.id))
         except Exception:
             user_uuid = uuid4()
 
@@ -48,7 +48,7 @@ async def generate_design(payload: DesignCreate, db: AsyncSession = Depends(get_
 
     # Store design in DB
     design = Design(
-        user_id=getattr(current_user, "id", None) or current_user.get("id") or current_user.get("sub"),
+        user_id=current_user.id,
         prompt=payload.prompt,
         image_data=image_bytes,
         format="PNG",

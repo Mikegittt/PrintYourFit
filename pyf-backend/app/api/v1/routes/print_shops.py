@@ -4,15 +4,6 @@ from sqlalchemy import select
 from app.api.v1.deps import get_db, get_current_active_user, require_role
 from app.models.print_shop import PrintShop
 from app.schemas.user import UserResponse
-
-router = APIRouter()
-
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from app.api.v1.deps import get_db, get_current_active_user, require_role
-from app.models.print_shop import PrintShop
-from app.schemas.user import UserResponse
 from datetime import datetime
 
 router = APIRouter()
@@ -21,17 +12,16 @@ router = APIRouter()
 async def register_shop(payload: dict, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
     """Register a print shop with WhatsApp number. No payment required."""
     if db is None:
-        # Still create a response for successful registration even without DB
         return {
             "status": "PENDING",
             "message": "Print shop registration submitted. Admin will contact you on WhatsApp within 5 minutes.",
             "whatsapp_contact": True
         }
-    if current_user.get("role") != "PRINT_SHOP":
+    if current_user.role != "PRINT_SHOP":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only print shop users can register shops")
     
     shop = PrintShop(
-        user_id=current_user.get("id") or current_user.get("sub"),
+        user_id=current_user.id,
         shop_name=payload.get("shop_name"),
         address=payload.get("address"),
         state=payload.get("state"),

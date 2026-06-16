@@ -9,7 +9,7 @@ router = APIRouter()
 @router.post("/submit", response_model=dict)
 async def submit_kyc_endpoint(payload: dict, current_user = Depends(get_current_active_user)):
     """Submit KYC information (documents, identity, etc.)."""
-    user_id = current_user.get("id") or current_user.get("sub")
+    user_id = current_user.id
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authenticated")
     
@@ -31,7 +31,7 @@ async def submit_kyc_endpoint(payload: dict, current_user = Depends(get_current_
 @router.get("/status", response_model=dict)
 async def get_kyc_status_endpoint(current_user = Depends(get_current_active_user)):
     """Get KYC status for current user."""
-    user_id = current_user.get("id") or current_user.get("sub")
+    user_id = current_user.id
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authenticated")
     

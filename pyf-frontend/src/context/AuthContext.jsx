@@ -5,36 +5,34 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [token, setToken] = useState(() => localStorage.getItem('pyf_access_token'))
 
   useEffect(() => {
-    if (token) {
-      api.defaults.headers.common.Authorization = `Bearer ${token}`
-      const storedUser = localStorage.getItem('pyf_user')
-      if (storedUser) {
-        setUser(JSON.parse(storedUser))
+    async function loadUser() {
+      try {
+        const response = await api.get('/users/me')
+        setUser(response.data)
+      } catch (err) {
+        setUser(null)
       }
     }
-  }, [token])
+    loadUser()
+  }, [])
 
   const login = (data) => {
-    localStorage.setItem('pyf_access_token', data.access_token)
-    localStorage.setItem('pyf_refresh_token', data.refresh_token)
-    api.defaults.headers.common.Authorization = `Bearer ${data.access_token}`
-    setToken(data.access_token)
+    setUser(data)
   }
 
-  const logout = () => {
-    localStorage.removeItem('pyf_access_token')
-    localStorage.removeItem('pyf_refresh_token')
-    localStorage.removeItem('pyf_user')
-    setToken(null)
+  const logout = async () => {
+    try {
+      await api.post('/auth/logout')
+    } catch (err) {
+      // ignore logout errors
+    }
     setUser(null)
-    delete api.defaults.headers.common.Authorization
   }
 
   return (
-    <AuthContext.Provider value={{ user, setUser, token, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

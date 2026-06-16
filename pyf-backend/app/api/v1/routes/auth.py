@@ -1,53 +1,49 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from datetime import timedelta
+from fastapi import APIRouter, HTTPException, status, Depends, Response, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.auth_service import create_user, authenticate_user, create_tokens, get_user_by_email
-from app.schemas.auth import RegisterRequest, LoginRequest, RefreshTokenRequest, Token
-from app.core.security import decode_token
+from app.services.auth_service import create_user, authenticate_user, create_session, delete_session, get_user_by_email
+from app.schemas.auth import RegisterRequest, LoginRequest, UserResponse
 from app.api.v1.deps import get_db
+from app.core.config import settings
 
 router = APIRouter()
 
+SESSION_COOKIE_NAME = "sessionid"
+SESSION_EXPIRE_DAYS = 30
 
-@router.post("/register", response_model=Token)
+
+@router.post("/register", response_model=UserResponse)
 async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db)):
     existing = await get_user_by_email(db, payload.email)
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     user = await create_user(db, payload)
-    return create_tokens(user)
+    return user
 
 
-@router.post("/login", response_model=Token)
-async def login(payload: LoginRequest, db: AsyncSession = Depends(get_db)):
+@router.post("/login", response_model=UserResponse)
+async def login(payload: LoginRequest, response: Response, db: AsyncSession = Depends(get_db)):
     user = await authenticate_user(db, payload)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    return create_tokens(user)
 
-
-@router.post("/refresh", response_model=Token)
-async def refresh_token(payload: RefreshTokenRequest):
-    try:
-        token_data = decode_token(payload.refresh_token)
-        if token_data.get("type") != "refresh":
-            raise ValueError("Not a refresh token")
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
-    # Rebuild token payload from claims
-    return create_tokens(type("U", (), {
-        "id": token_data["sub"],
-        "full_name": token_data.get("full_name"),
-        "email": token_data.get("email"),
-        "role": token_data.get("role"),
-        "target_campus": token_data.get("target_campus"),
-        "referral_code": token_data.get("referral_code"),
-        "referred_by": token_data.get("referred_by"),
-        "is_active": token_data.get("is_active"),
-        "kyc_completed": token_data.get("kyc_completed", False),
-        "created_at": token_data.get("created_at"),
-    }))
+    session = await create_session(db, user, expires_days=SESSION_EXPIRE_DAYS)
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=session.id,
+        httponly=True,
+        secure=not settings.DEBUG,
+        samesite="none",
+        max_age=SESSION_EXPIRE_DAYS * 24 * 60 * 60,
+        expires=SESSION_EXPIRE_DAYS * 24 * 60 * 60,
+        path="/",
+    )
+    return user
 
 
 @router.post("/logout")
-async def logout():
+async def logout(response: Response, db: AsyncSession = Depends(get_db), session_id: str | None = Cookie(default=None, alias=SESSION_COOKIE_NAME)):
+    if session_id:
+        await delete_session(db, session_id)
+    response.delete_cookie(SESSION_COOKIE_NAME, path="/")
     return {"status": "logged_out"}

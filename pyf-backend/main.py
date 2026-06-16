@@ -2,7 +2,7 @@ import traceback
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from app.api.v1.api import api_router
 from app.core.database import engine, Base
 from app.core.config import settings
@@ -13,8 +13,8 @@ app = FastAPI(title="Print Your Fit API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=[settings.FRONTEND_URL],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -61,7 +61,7 @@ async def startup_event():
 
 @app.get("/")
 async def root():
-    return {"message": "Print Your Fit API is running"}
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}/admin/orders")
 
 # Temporary debug endpoint to report installed package versions (only enabled in DEBUG mode)
 @app.get("/_debug/versions")

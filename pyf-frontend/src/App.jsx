@@ -16,7 +16,6 @@ import AIDesigner from './pages/AIDesigner'
 import AdminOrders from './pages/AdminOrders'
 import AdminShops from './pages/AdminShops'
 import AdminUsers from './pages/AdminUsers'
-import AdminAccess from './pages/AdminAccess'
 import AdminGate from './routes/AdminGate'
 import KYC from './pages/KYC'
 import ProtectedRoute from './routes/ProtectedRoute'
@@ -45,7 +44,6 @@ function App() {
         <Route path="/shop/queue" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><ShopQueue /></ProtectedRoute>} />
         <Route path="/shop/onboard" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><PrintShopOnboarding /></ProtectedRoute>} />
         <Route path="/shop/onboard/verify" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><PrintShopVerify /></ProtectedRoute>} />
-        <Route path="/admin" element={<AdminAccess />} />
         <Route path="/admin/orders" element={<AdminGate><AdminOrders /></AdminGate>} />
         <Route path="/admin/shops" element={<AdminGate><AdminShops /></AdminGate>} />
         <Route path="/admin/users" element={<AdminGate><AdminUsers /></AdminGate>} />

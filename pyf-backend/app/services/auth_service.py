@@ -1,10 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.core.security import get_password_hash, verify_password, create_access_token, create_refresh_token, build_referral_code
-from app.schemas.auth import RegisterRequest, LoginRequest
+from app.core.security import get_password_hash, verify_password, build_referral_code
 from app.models.user import User
+from app.models.session import Session
+from app.schemas.auth import RegisterRequest, LoginRequest
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
@@ -46,21 +47,17 @@ async def authenticate_user(db: AsyncSession, login_in: LoginRequest) -> Optiona
     return user
 
 
-def create_tokens(user: User) -> dict:
-    extra_claims = {
-        "full_name": getattr(user, "full_name", None),
-        "email": getattr(user, "email", None),
-        "role": getattr(user, "role", None),
-        "target_campus": getattr(user, "target_campus", None),
-        "referral_code": getattr(user, "referral_code", None),
-        "referred_by": getattr(user, "referred_by", None),
-        "is_active": getattr(user, "is_active", True),
-        "kyc_completed": getattr(user, "kyc_completed", False),
-        "created_at": getattr(user, "created_at", None),
-    }
-    return {
-        "access_token": create_access_token(subject=str(user.id), extra_claims=extra_claims),
-        "refresh_token": create_refresh_token(subject=str(user.id), extra_claims=extra_claims),
-        "token_type": "bearer",
-        "id": str(user.id),
-    }
+async def create_session(db: AsyncSession, user: User, expires_days: int = 30) -> Session:
+    expires_at = datetime.utcnow() + timedelta(days=expires_days)
+    session = Session(user_id=user.id, expires_at=expires_at)
+    db.add(session)
+    await db.commit()
+    await db.refresh(session)
+    return session
+
+
+async def delete_session(db: AsyncSession, session_id: str) -> None:
+    session = await db.get(Session, session_id)
+    if session:
+        await db.delete(session)
+        await db.commit()

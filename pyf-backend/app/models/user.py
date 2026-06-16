@@ -23,6 +23,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     referred_users = relationship("User", remote_side=[id])
+    sessions = relationship("Session", back_populates="user")
     print_shop = relationship("PrintShop", back_populates="user", uselist=False)
     orders = relationship("Order", back_populates="customer", foreign_keys=[Order.customer_id])
     points = relationship("PointsLedger", back_populates="user")

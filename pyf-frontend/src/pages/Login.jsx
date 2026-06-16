@@ -10,7 +10,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const { login, setUser } = useAuth()
+  const { login } = useAuth()
   const { showToast } = useToast()
 
   async function submit(event) {
@@ -20,9 +20,6 @@ export default function Login() {
     try {
       const response = await api.post('/auth/login', form)
       login(response.data)
-      const profile = await api.get('/users/me')
-      setUser(profile.data)
-      localStorage.setItem('pyf_user', JSON.stringify(profile.data))
       showToast({ message: 'Welcome back! Redirecting to dashboard.', type: 'success' })
       navigate('/dashboard')
     } catch (err) {
