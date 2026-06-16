@@ -34,5 +34,7 @@ services:
         fromSecret: VTPASS_URL
       - key: DEBUG
         value: "true"
+      - key: FRONTEND_URL
+        value: "https://print-your-fit.vercel.app"
       - key: DEFAULT_PRINT_SHOP_ID
         fromSecret: DEFAULT_PRINT_SHOP_ID
