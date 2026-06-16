@@ -8,20 +8,47 @@ from app.schemas.design import DesignCreate, DesignResponse, DesignExport, SendT
 from app.services.design_service import generate_image_from_prompt, convert_image_format
 from uuid import UUID
 import base64
+from uuid import uuid4
+from datetime import datetime
 
 router = APIRouter()
 
 @router.post("/generate", response_model=DesignResponse)
 async def generate_design(payload: DesignCreate, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
     """Generate an AI design from a text prompt."""
-    # Generate image using Hugging Face
-    image_bytes = await generate_image_from_prompt(payload.prompt)
+    # Generate image using Hugging Face (handle service/network failures)
+    try:
+        image_bytes = await generate_image_from_prompt(payload.prompt)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Image generation failed: {e}")
+
     if not image_bytes:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate image")
-    
-    # Store design
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Image generation service unavailable")
+
+    # Prepare response fields
+    image_b64 = base64.b64encode(image_bytes).decode()
+    created_at = datetime.utcnow()
+
+    # If no DB session is available, skip persistence but still return image preview
+    if db is None:
+        # try to coerce user id to UUID, fallback to random UUID
+        try:
+            user_uuid = UUID(getattr(current_user, "id", None) or current_user.get("id") or current_user.get("sub"))
+        except Exception:
+            user_uuid = uuid4()
+
+        return {
+            "id": uuid4(),
+            "user_id": user_uuid,
+            "prompt": payload.prompt,
+            "image_url": f"data:image/png;base64,{image_b64}",
+            "format": "PNG",
+            "created_at": created_at,
+        }
+
+    # Store design in DB
     design = Design(
-        user_id=current_user.id,
+        user_id=getattr(current_user, "id", None) or current_user.get("id") or current_user.get("sub"),
         prompt=payload.prompt,
         image_data=image_bytes,
         format="PNG",
@@ -29,9 +56,8 @@ async def generate_design(payload: DesignCreate, db: AsyncSession = Depends(get_
     db.add(design)
     await db.commit()
     await db.refresh(design)
-    
+
     # Return with base64 encoded image for display
-    image_b64 = base64.b64encode(image_bytes).decode()
     return {
         "id": design.id,
         "user_id": design.user_id,
@@ -44,6 +70,9 @@ async def generate_design(payload: DesignCreate, db: AsyncSession = Depends(get_
 @router.get("/my-designs", response_model=list[DesignResponse])
 async def list_user_designs(db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
     """List all designs created by current user."""
+    if db is None:
+        return []
+
     result = await db.execute(select(Design).where(Design.user_id == current_user.id).order_by(Design.created_at.desc()))
     designs = result.scalars().all()
     items = []
@@ -66,6 +95,9 @@ async def list_user_designs(db: AsyncSession = Depends(get_db), current_user = D
 @router.get("/{design_id}", response_model=DesignResponse)
 async def get_design(design_id: str, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
     """Get a design by ID."""
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
+
     design = await db.get(Design, UUID(design_id))
     if not design:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Design not found")
@@ -90,6 +122,9 @@ async def get_design(design_id: str, db: AsyncSession = Depends(get_db), current
 @router.post("/{design_id}/export")
 async def export_design(design_id: str, payload: DesignExport, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
     """Export design in a specific format (PNG, JPEG, WebP, etc.)."""
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
+
     design = await db.get(Design, UUID(design_id))
     if not design:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Design not found")
@@ -122,6 +157,9 @@ async def export_design(design_id: str, payload: DesignExport, db: AsyncSession 
 @router.post("/{design_id}/send-to-printer")
 async def send_design_to_printer(design_id: str, payload: SendToPrinter, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
     """Send a design to a printer and create an order for negotiation."""
+    if db is None:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable")
+
     design = await db.get(Design, UUID(design_id))
     if not design:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Design not found")
