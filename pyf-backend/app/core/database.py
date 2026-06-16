@@ -12,22 +12,7 @@ connect_args = {}
 if url.drivername.startswith("sqlite"):
     connect_args["check_same_thread"] = False
 
-# PostgreSQL asyncpg URLs should not pass unsupported query args directly into asyncpg
-if url.drivername == "postgresql+asyncpg":
-    query = dict(url.query)
-    sslmode = query.pop("sslmode", None)
-    if sslmode is not None:
-        query["ssl"] = "true" if sslmode in ("require", "verify-ca", "verify-full") else "false"
-
-    query.pop("channel_binding", None)
-
-    ssl_value = query.get("ssl")
-    if ssl_value in ("true", "1", "yes"):
-        connect_args["ssl"] = True
-    elif ssl_value in ("false", "0", "no"):
-        connect_args["ssl"] = False
-
-    db_url = str(url.set(query=query))
+# No Neon-specific asyncpg normalization — use DATABASE_URL as provided
 
 engine: AsyncEngine = create_async_engine(
     db_url,
