@@ -8,7 +8,17 @@ router = APIRouter()
 
 @router.get("/me", response_model=UserResponse)
 async def read_me(current_user = Depends(get_current_active_user)):
-    return current_user
+    return {
+        "id": current_user.get("sub"),
+        "full_name": current_user.get("full_name"),
+        "email": current_user.get("email"),
+        "role": current_user.get("role"),
+        "target_campus": current_user.get("target_campus"),
+        "referral_code": current_user.get("referral_code"),
+        "referred_by": current_user.get("referred_by"),
+        "is_active": current_user.get("is_active"),
+        "created_at": current_user.get("created_at"),
+    }
 
 @router.put("/me", response_model=UserResponse)
 async def update_me(payload: UserUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_active_user)):
