@@ -22,9 +22,12 @@ app.add_middleware(
 async def ensure_cors_headers(request: Request, call_next):
     try:
         response = await call_next(request)
-    except Exception:
+    except Exception as exc:
         traceback.print_exc()
-        response = JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
+        content = {"detail": "Internal Server Error"}
+        if settings.DEBUG:
+            content["error"] = str(exc)
+        response = JSONResponse(status_code=500, content=content)
 
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
