@@ -16,6 +16,7 @@ export default function Layout({ children }) {
               <>
                 <Link to="/dashboard">Dashboard</Link>
                 <Link to="/design-studio">AI Designer</Link>
+                <Link to="/kyc">KYC</Link>
                 <Link to="/wallet">Wallet</Link>
                 {user.role === 'ADMIN' && <Link to="/admin/orders" className="transition hover:text-white">Admin</Link>}
               </>
@@ -32,7 +33,7 @@ export default function Layout({ children }) {
       <footer className="relative z-10 border-t border-white/10 bg-slate-950/75 backdrop-blur-xl py-8 text-slate-400">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 text-sm sm:flex-row sm:items-center sm:justify-between px-4">
           <p>© 2026 Print Your Fit. Built for fast, modern print commerce.</p>
-          <p>Designed for customers, ambassadors, print shops, and admins.</p>
+          <p>Designed for customers (with ambassador benefits), print shops, and admins.</p>
         </div>
       </footer>
     </div>

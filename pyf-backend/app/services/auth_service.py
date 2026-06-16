@@ -14,16 +14,21 @@ async def create_user(user_in: RegisterRequest) -> dict:
         raise ValueError("Email already registered")
 
     user_id = uuid4()
+    # Normalize role: AMBASSADOR is now merged with CUSTOMER
+    role = "CUSTOMER" if user_in.role in ["AMBASSADOR", "CUSTOMER"] else user_in.role
+    
     user = {
         "id": user_id,
         "full_name": user_in.full_name,
         "email": user_in.email,
         "hashed_password": get_password_hash(user_in.password),
-        "role": user_in.role,
+        "role": role,
         "target_campus": user_in.target_campus,
-        "referral_code": build_referral_code() if user_in.role == "AMBASSADOR" else None,
+        "referral_code": build_referral_code() if role == "CUSTOMER" else None,
         "referred_by": None,
         "is_active": True,
+        "kyc_completed": False,
+        "kyc_completed_at": None,
         "created_at": datetime.utcnow().isoformat(),
     }
     _users[user_in.email.lower()] = user
@@ -46,6 +51,7 @@ def create_tokens(user: dict) -> dict:
         "referral_code": user["referral_code"],
         "referred_by": user["referred_by"],
         "is_active": user["is_active"],
+        "kyc_completed": user.get("kyc_completed", False),
         "created_at": user["created_at"],
     }
     return {

@@ -37,16 +37,16 @@ export default function Register() {
         <p className="text-sm uppercase tracking-[0.3em] text-indigo-200">Create your account</p>
         <h1 className="mt-4 text-4xl font-semibold text-white">Join Print Your Fit</h1>
         <p className="mt-4 max-w-xl text-slate-300">
-          Register as a customer, ambassador, or print shop and start managing orders, tracking referrals, and growing your printing business.
+          Register as a customer or print shop and start managing orders, earning referral rewards, and growing your business. All customers get ambassador benefits!
         </p>
         <div className="mt-10 grid gap-4">
           <div className="rounded-3xl bg-slate-900/90 p-5 text-slate-200">
             <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Why register?</p>
-            <p className="mt-3 text-sm leading-6 text-slate-300">Connect with buyers, earn referral rewards, and build print shop visibility on a modern marketplace.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">Connect with sellers, earn referral rewards, track your orders, and grow your business on a modern marketplace.</p>
           </div>
           <div className="rounded-3xl bg-indigo-500/10 p-5 text-indigo-100">
-            <p className="text-sm uppercase tracking-[0.24em]">Referral ready</p>
-            <p className="mt-3 text-sm leading-6 text-slate-300">If you have a referral code, it will be applied automatically for ambassador rewards.</p>
+            <p className="text-sm uppercase tracking-[0.24em]">Ambassador benefits included</p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">All customers now enjoy ambassador perks like referral rewards and affiliate commission opportunities.</p>
           </div>
         </div>
       </div>
@@ -67,8 +67,7 @@ export default function Register() {
           <div>
             <label className="text-sm font-medium text-slate-200">Role</label>
             <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="mt-3 w-full px-4 py-3 bg-slate-900/90">
-              <option value="CUSTOMER">Customer</option>
-              <option value="AMBASSADOR">Ambassador</option>
+              <option value="CUSTOMER">Customer (with ambassador benefits)</option>
               <option value="PRINT_SHOP">Print Shop</option>
             </select>
           </div>

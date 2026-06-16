@@ -13,8 +13,12 @@ class PrintShop(Base):
     shop_name = Column(String(128), nullable=False)
     address = Column(Text, nullable=False)
     state = Column(String(64), nullable=False)
+    whatsapp_number = Column(String(20), nullable=False)  # WhatsApp number for admin contact
     status = Column(String(32), default="PENDING")  # PENDING, APPROVED, REJECTED
     is_verified = Column(Boolean, default=False)
+    kyc_completed = Column(Boolean, default=False)
+    kyc_completed_at = Column(DateTime(timezone=True), nullable=True)
+    approved_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="print_shop")

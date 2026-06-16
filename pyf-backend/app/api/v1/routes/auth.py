@@ -28,7 +28,7 @@ async def refresh_token(payload: RefreshTokenRequest):
             raise ValueError("Not a refresh token")
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
-    return create_tokens({"id": token_data["sub"], "full_name": token_data.get("full_name"), "email": token_data.get("email"), "role": token_data.get("role"), "target_campus": token_data.get("target_campus"), "referral_code": token_data.get("referral_code"), "referred_by": token_data.get("referred_by"), "is_active": token_data.get("is_active"), "created_at": token_data.get("created_at")})
+    return create_tokens({"id": token_data["sub"], "full_name": token_data.get("full_name"), "email": token_data.get("email"), "role": token_data.get("role"), "target_campus": token_data.get("target_campus"), "referral_code": token_data.get("referral_code"), "referred_by": token_data.get("referred_by"), "is_active": token_data.get("is_active"), "kyc_completed": token_data.get("kyc_completed", False), "created_at": token_data.get("created_at")})
 
 @router.post("/logout")
 async def logout():

@@ -13,11 +13,13 @@ class User(Base):
     full_name = Column(String(128), nullable=False)
     email = Column(String(128), unique=True, nullable=False, index=True)
     hashed_password = Column(String(256), nullable=False)
-    role = Column(String(32), nullable=False)
+    role = Column(String(32), nullable=False)  # CUSTOMER or PRINT_SHOP or ADMIN
     referral_code = Column(String(32), unique=True, nullable=True)
     referred_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     target_campus = Column(String(64), nullable=True)
     is_active = Column(Boolean, default=True)
+    kyc_completed = Column(Boolean, default=False)
+    kyc_completed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     referred_users = relationship("User", remote_side=[id])

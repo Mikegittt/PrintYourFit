@@ -15,6 +15,7 @@ import OrderDetail from './pages/OrderDetail'
 import AIDesigner from './pages/AIDesigner'
 import AdminOrders from './pages/AdminOrders'
 import AdminShops from './pages/AdminShops'
+import KYC from './pages/KYC'
 import ProtectedRoute from './routes/ProtectedRoute'
 import Layout from './components/Layout'
 import { useAuth } from './context/AuthContext'
@@ -36,6 +37,8 @@ function App() {
         <Route path="/shop/:id" element={<ProtectedRoute><ShopDetail /></ProtectedRoute>} />
         <Route path="/design-studio" element={<ProtectedRoute><AIDesigner /></ProtectedRoute>} />
         <Route path="/affiliate/dashboard" element={<ProtectedRoute allowedRoles={['AMBASSADOR']}><AffiliateDashboard /></ProtectedRoute>} />
+          <Route path="/affiliate/dashboard" element={<ProtectedRoute allowedRoles={['CUSTOMER']}><AffiliateDashboard /></ProtectedRoute>} />
+        <Route path="/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
         <Route path="/shop/queue" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><ShopQueue /></ProtectedRoute>} />
         <Route path="/shop/onboard" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><PrintShopOnboarding /></ProtectedRoute>} />
         <Route path="/shop/onboard/verify" element={<ProtectedRoute allowedRoles={['PRINT_SHOP']}><PrintShopVerify /></ProtectedRoute>} />
