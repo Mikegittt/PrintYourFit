@@ -38,6 +38,14 @@ AsyncSessionLocal = sessionmaker(
 
 Base = declarative_base()
 
+# Ensure all models are imported so SQLAlchemy Base metadata is populated
+# when `create_all` is called from tests or external scripts.
+try:
+    import app.models  # noqa: F401
+except Exception:
+    # Import errors should not prevent module import; they'll surface later
+    pass
+
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session
