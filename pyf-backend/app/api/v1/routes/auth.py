@@ -2,7 +2,8 @@ from datetime import timedelta
 from fastapi import APIRouter, HTTPException, status, Depends, Response, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.auth_service import create_user, authenticate_user, create_session, delete_session, get_user_by_email
-from app.schemas.auth import RegisterRequest, LoginRequest, UserResponse
+from app.schemas.auth import RegisterRequest, LoginRequest
+from app.schemas.user import UserResponse
 from app.api.v1.deps import get_db
 from app.core.config import settings
 
