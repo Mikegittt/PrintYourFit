@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     VTPASS_URL: str = "https://vtpass.com/api"
     HF_MODEL: str = Field(default="stabilityai/stable-diffusion-2")
     HF_API_TOKEN: str = Field(default="")
+    ENABLE_DEBUG_ENDPOINTS: bool = Field(default=True)
     DEFAULT_PRINT_SHOP_ID: str = Field(default="dev")
 
     class Config:
