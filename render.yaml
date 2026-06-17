@@ -11,11 +11,13 @@ services:
       export PIP_CACHE_DIR=/tmp/pip-cache
       python --version
       pip install --no-cache-dir -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd django_project && python manage.py migrate --noinput && gunicorn django_project.wsgi:application --bind 0.0.0.0:$PORT
     workingDirectory: pyf-backend
     envVars:
       - key: DATABASE_URL
         fromSecret: DATABASE_URL
+      - key: DJANGO_SETTINGS_MODULE
+        value: django_project.settings
       - key: SECRET_KEY
         fromSecret: SECRET_KEY
       - key: CLOUDINARY_CLOUD_NAME

@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     async function loadUser() {
       try {
+        await api.get('/auth/csrf')
         const response = await api.get('/users/me')
         setUser(response.data)
       } catch (err) {

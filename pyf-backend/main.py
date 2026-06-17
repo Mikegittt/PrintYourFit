@@ -14,26 +14,11 @@ app = FastAPI(title="Print Your Fit API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.FRONTEND_URL],
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.middleware("http")
-async def ensure_cors_headers(request: Request, call_next):
-    try:
-        response = await call_next(request)
-    except Exception as exc:
-        traceback.print_exc()
-        content = {"detail": "Internal Server Error"}
-        # Temporarily expose error details for debugging (remove after fix)
-        content["error"] = str(exc)
-        response = JSONResponse(status_code=500, content=content)
-
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
 
 @app.exception_handler(Exception)
 async def all_exception_handler(request: Request, exc: Exception):
@@ -42,9 +27,6 @@ async def all_exception_handler(request: Request, exc: Exception):
     # Temporarily expose error details for debugging (remove after fix)
     content["error"] = str(exc)
     response = JSONResponse(status_code=500, content=content)
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
     return response
 
 app.include_router(api_router, prefix="/api/v1")
