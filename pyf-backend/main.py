@@ -1,8 +1,8 @@
 import traceback
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from app.api.v1.api import api_router
 from app.core.database import engine, Base
 from app.core.config import settings
@@ -41,9 +41,8 @@ async def startup_event():
         print("Starting Print Your Fit API")
     await create_tables()
 
-@app.get("/")
-async def root():
-    return RedirectResponse(url=f"{settings.FRONTEND_URL}/admin/orders")
+# The Django app now owns the frontend + admin root path.
+# Keep this FastAPI file only for the legacy API router if still in use.
 
 # Temporary debug endpoint to report installed package versions (only enabled in DEBUG mode)
 @app.get("/_debug/versions")
