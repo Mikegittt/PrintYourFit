@@ -55,6 +55,13 @@ WSGI_APPLICATION = 'django_project.wsgi.application'
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
+    # dj_database_url does not recognize SQLAlchemy-style schemes like
+    # 'postgresql+asyncpg://'. Normalize common SQLAlchemy schemes to a
+    # plain 'postgresql://' so dj_database_url can parse them.
+    if DATABASE_URL.startswith('postgresql+asyncpg://'):
+        DATABASE_URL = DATABASE_URL.replace('postgresql+asyncpg://', 'postgresql://', 1)
+    if DATABASE_URL.startswith('postgresql+psycopg2://'):
+        DATABASE_URL = DATABASE_URL.replace('postgresql+psycopg2://', 'postgresql://', 1)
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600, engine='django.db.backends.postgresql')
