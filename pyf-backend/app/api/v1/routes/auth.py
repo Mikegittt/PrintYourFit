@@ -29,12 +29,13 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     session = await create_session(db, user, expires_days=SESSION_EXPIRE_DAYS)
+    secure_cookie = not settings.DEBUG and settings.FRONTEND_URL.startswith("https://")
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=session.id,
         httponly=True,
-        secure=not settings.DEBUG,
-        samesite="none",
+        secure=secure_cookie,
+        samesite="none" if secure_cookie else "lax",
         max_age=SESSION_EXPIRE_DAYS * 24 * 60 * 60,
         expires=SESSION_EXPIRE_DAYS * 24 * 60 * 60,
         path="/",
