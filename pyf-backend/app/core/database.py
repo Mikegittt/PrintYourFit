@@ -4,6 +4,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.pool import NullPool
 from app.core.config import settings
 import logging
+import ssl
 
 logger = logging.getLogger(__name__)
 
@@ -38,20 +39,30 @@ else:
     # Re-parse the modified URL
     url = make_url(raw_db_url)
     
-    # Remove sslmode and other incompatible parameters
+    # Handle SSL params for asyncpg
+    ssl_context = None
     if url.query:
         filtered_query = {
             k: v
             for k, v in url.query.items()
-            if k.lower() not in ['sslmode', 'channel_binding']
+            if k.lower() not in ['channel_binding']
         }
+
+        sslmode = url.query.get('sslmode')
+        if sslmode and sslmode.lower() in ['require', 'verify-ca', 'verify-full']:
+            ssl_context = ssl.create_default_context()
+            if sslmode.lower() == 'require':
+                ssl_context.check_hostname = False
+            if sslmode.lower() == 'disable':
+                ssl_context = None
+
         if filtered_query:
             db_url = str(url.set(query=filtered_query))
         else:
             db_url = str(url.set(query={}))
     else:
         db_url = raw_db_url
-    
+
     logger.info(f"[DATABASE] Final URL scheme: {url.drivername}")
 
 engine: AsyncEngine = create_async_engine(
@@ -60,6 +71,7 @@ engine: AsyncEngine = create_async_engine(
     echo=False,
     connect_args=connect_args,
     poolclass=NullPool if not url.drivername.startswith("sqlite") else None,
+    ssl=ssl_context,
 )
 
 AsyncSessionLocal = sessionmaker(
