@@ -9,6 +9,7 @@ export default function PrintShopOnboarding() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
   const { showToast } = useToast()
 
@@ -19,8 +20,7 @@ export default function PrintShopOnboarding() {
     try {
       const response = await api.post('/print-shops/register', form)
       setSubmitted(true)
-      showToast({ message: 'Registration submitted! Admin will contact you on WhatsApp within 5 minutes.', type: 'success' })
-      setTimeout(() => navigate('/shop/dashboard'), 3000)
+      setShowModal(true)
     } catch (err) {
       const message = err.response?.data?.detail || err.response?.data?.message || err.message || 'Could not submit print shop registration.'
       setError(message)
@@ -53,7 +53,7 @@ export default function PrintShopOnboarding() {
           <div className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-white">Stay tuned!</h2>
-              <p className="mt-2 text-slate-400">You'll receive a WhatsApp message shortly. Make sure to keep your phone handy.</p>
+              <p className="mt-2 text-slate-400">You'll receive a WhatsApp message shortly. Make sure to keep your phone handy. Our admin will handle the onboarding fee and provide any additional information during the chat.</p>
             </div>
             <button
               onClick={() => navigate('/shop/dashboard')}
@@ -63,6 +63,22 @@ export default function PrintShopOnboarding() {
             </button>
           </div>
         </div>
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="w-full max-w-lg rounded-xl bg-white p-6">
+              <h3 className="text-lg font-semibold">Registration submitted</h3>
+              <p className="mt-4 text-sm text-slate-700">Thanks — your details have been sent to our admin team. They will message you on WhatsApp within 5 minutes to confirm details and handle the onboarding fee and all necessary information.</p>
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="rounded-full bg-indigo-500 px-4 py-2 text-white"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
