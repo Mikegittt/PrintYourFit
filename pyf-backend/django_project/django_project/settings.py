@@ -105,10 +105,21 @@ CORS_ALLOW_HEADERS = [
     'content-type',
     'x-csrftoken',
     'authorization',
+    'x-requested-with',
+]
+CORS_ALLOWED_ORIGINS = [
+    os.environ.get('FRONTEND_URL', 'http://localhost:5173'),
+    'https://print-your-fit.vercel.app',
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https?://([a-z0-9-]+\.)?print-your-fit\.vercel\.app$',
 ]
 CSRF_TRUSTED_ORIGINS = [
     os.environ.get('FRONTEND_URL', 'http://localhost:5173'),
+    'https://print-your-fit.vercel.app',
 ]
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = 'None'
 SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SAMESITE = 'None'
 SECURE_BROWSER_XSS_FILTER = True
