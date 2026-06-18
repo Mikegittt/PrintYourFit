@@ -43,6 +43,11 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
     return user
 
 
+@router.get("/csrf")
+async def csrf_token():
+    return {"csrfToken": ""}
+
+
 @router.post("/logout")
 async def logout(response: Response, db: AsyncSession = Depends(get_db), session_id: str | None = Cookie(default=None, alias=SESSION_COOKIE_NAME)):
     if session_id:
