@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.engine import make_url
+from sqlalchemy.pool import NullPool
 from app.core.config import settings
 import logging
 
@@ -23,15 +24,38 @@ if url.drivername.startswith("sqlite"):
     db_url = raw_db_url
     connect_args["check_same_thread"] = False
 else:
-    logger.info(f"[DATABASE] Using {url.drivername}: {raw_db_url}")
-    db_url = raw_db_url
-    # For PostgreSQL and other databases, don't set check_same_thread
+    # For PostgreSQL with asyncpg, we need to:
+    # 1. Convert postgresql:// to postgresql+asyncpg:// for async support
+    # 2. Remove query parameters incompatible with asyncpg (like sslmode)
+    logger.info(f"[DATABASE] Using PostgreSQL with asyncpg: {raw_db_url}")
+    
+    # Replace postgresql:// with postgresql+asyncpg://
+    if raw_db_url.startswith("postgresql://"):
+        raw_db_url = raw_db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    elif raw_db_url.startswith("postgres://"):
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    
+    # Re-parse the modified URL
+    url = make_url(raw_db_url)
+    
+    # Remove sslmode and other incompatible parameters
+    if url.query:
+        filtered_query = {k: v for k, v in url.query.items() if k.lower() not in ['sslmode']}
+        if filtered_query:
+            db_url = url.set(query=filtered_query)
+        else:
+            db_url = url.remove(query=True)
+    else:
+        db_url = raw_db_url
+    
+    logger.info(f"[DATABASE] Final URL scheme: {db_url.drivername}")
 
 engine: AsyncEngine = create_async_engine(
     db_url,
     future=True,
     echo=False,
     connect_args=connect_args,
+    poolclass=NullPool if not url.drivername.startswith("sqlite") else None,
 )
 
 AsyncSessionLocal = sessionmaker(
