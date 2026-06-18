@@ -2,6 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.engine import make_url
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_SQLITE_URL = "sqlite+aiosqlite:///./dev.db"
 raw_db_url = str(settings.DATABASE_URL).strip()
@@ -9,19 +12,20 @@ connect_args = {}
 
 try:
     url = make_url(raw_db_url)
-except Exception:
+except Exception as e:
+    logger.warning(f"[DATABASE] Failed to parse DATABASE_URL: {e}. Using SQLite.")
     url = make_url(DEFAULT_SQLITE_URL)
     raw_db_url = DEFAULT_SQLITE_URL
 
-if not url.drivername.startswith("sqlite"):
-    print(
-        "WARNING: DATABASE_URL is not SQLite. Falling back to local SQLite for runtime."
-    )
-    db_url = DEFAULT_SQLITE_URL
-    connect_args["check_same_thread"] = False
-else:
+# Use the provided database URL if it's valid, otherwise fall back to SQLite
+if url.drivername.startswith("sqlite"):
+    logger.info(f"[DATABASE] Using SQLite: {raw_db_url}")
     db_url = raw_db_url
     connect_args["check_same_thread"] = False
+else:
+    logger.info(f"[DATABASE] Using {url.drivername}: {raw_db_url}")
+    db_url = raw_db_url
+    # For PostgreSQL and other databases, don't set check_same_thread
 
 engine: AsyncEngine = create_async_engine(
     db_url,
