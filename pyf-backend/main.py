@@ -1,4 +1,5 @@
 import traceback
+import logging
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +10,14 @@ from app.core.config import settings
 import app.models
 from app.core.version_debug import get_versions
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Print Your Fit API", version="0.1.0")
+
+logger.info(f"[STARTUP] DEBUG={settings.DEBUG}")
+logger.info(f"[STARTUP] FRONTEND_URL={settings.FRONTEND_URL}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,6 +27,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logger.info(f"[STARTUP] CORS configured with origins: {[settings.FRONTEND_URL]}")
 
 @app.exception_handler(Exception)
 async def all_exception_handler(request: Request, exc: Exception):
@@ -38,7 +48,9 @@ async def create_tables():
 @app.on_event("startup")
 async def startup_event():
     if settings.DEBUG:
-        print("Starting Print Your Fit API")
+        logger.info("[STARTUP] Starting Print Your Fit API in DEBUG mode")
+    else:
+        logger.info("[STARTUP] Starting Print Your Fit API in PRODUCTION mode")
     await create_tables()
 
 @app.get("/")

@@ -6,6 +6,9 @@ from app.schemas.auth import RegisterRequest, LoginRequest
 from app.schemas.user import UserResponse
 from app.api.v1.deps import get_db
 from app.core.config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -19,6 +22,7 @@ async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db))
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
     user = await create_user(db, payload)
+    logger.info(f"[AUTH] User registered: {user.email}")
     return user
 
 
@@ -26,10 +30,15 @@ async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db))
 async def login(payload: LoginRequest, response: Response, db: AsyncSession = Depends(get_db)):
     user = await authenticate_user(db, payload)
     if not user:
+        logger.warning(f"[AUTH] Login failed for {payload.email}: invalid credentials")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     session = await create_session(db, user, expires_days=SESSION_EXPIRE_DAYS)
+    logger.info(f"[AUTH] Session created: {session.id} for user {user.email}")
+    
     secure_cookie = not settings.DEBUG and settings.FRONTEND_URL.startswith("https://")
+    logger.info(f"[AUTH] Setting cookie with: DEBUG={settings.DEBUG}, FRONTEND_URL={settings.FRONTEND_URL}, secure_cookie={secure_cookie}")
+    
     response.set_cookie(
         key=SESSION_COOKIE_NAME,
         value=session.id,
@@ -40,6 +49,7 @@ async def login(payload: LoginRequest, response: Response, db: AsyncSession = De
         expires=SESSION_EXPIRE_DAYS * 24 * 60 * 60,
         path="/",
     )
+    logger.info(f"[AUTH] Login successful: {user.email}")
     return user
 
 
@@ -52,5 +62,6 @@ async def csrf_token():
 async def logout(response: Response, db: AsyncSession = Depends(get_db), session_id: str | None = Cookie(default=None, alias=SESSION_COOKIE_NAME)):
     if session_id:
         await delete_session(db, session_id)
+        logger.info(f"[AUTH] Logged out session: {session_id}")
     response.delete_cookie(SESSION_COOKIE_NAME, path="/")
     return {"status": "logged_out"}
