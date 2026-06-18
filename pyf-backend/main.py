@@ -29,7 +29,7 @@ async def all_exception_handler(request: Request, exc: Exception):
     response = JSONResponse(status_code=500, content=content)
     return response
 
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api")
 
 async def create_tables():
     async with engine.begin() as conn:
@@ -43,8 +43,7 @@ async def startup_event():
 
 @app.get("/")
 async def root():
-    # If Render still routes this domain to the FastAPI service, send users to Django admin.
-    return RedirectResponse(url="/admin/", status_code=302)
+    return {"status": "Print Your Fit API is running"}
 
 # Temporary debug endpoint to report installed package versions (only enabled in DEBUG mode)
 @app.get("/_debug/versions")
