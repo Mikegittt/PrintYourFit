@@ -46,13 +46,13 @@ else:
             if k.lower() not in ['sslmode', 'channel_binding']
         }
         if filtered_query:
-            db_url = url.set(query=filtered_query)
+            db_url = str(url.set(query=filtered_query))
         else:
-            db_url = url.remove(query=True)
+            db_url = str(url.set(query={}))
     else:
         db_url = raw_db_url
     
-    logger.info(f"[DATABASE] Final URL scheme: {db_url.drivername}")
+    logger.info(f"[DATABASE] Final URL scheme: {url.drivername}")
 
 engine: AsyncEngine = create_async_engine(
     db_url,
