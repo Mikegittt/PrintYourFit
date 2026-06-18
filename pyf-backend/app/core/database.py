@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_SQLITE_URL = "sqlite+aiosqlite:///./dev.db"
 raw_db_url = str(settings.DATABASE_URL).strip()
 connect_args = {}
+ssl_context = None
 
 try:
     url = make_url(raw_db_url)
