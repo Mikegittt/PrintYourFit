@@ -11,4 +11,11 @@ const api = axios.create({
 api.defaults.xsrfCookieName = 'csrftoken'
 api.defaults.xsrfHeaderName = 'X-CSRFToken'
 
+api.interceptors.request.use((config) => {
+  if (config.url && !config.url.startsWith('http') && !config.url.endsWith('/')) {
+    config.url = `${config.url}/`
+  }
+  return config
+})
+
 export default api
