@@ -66,14 +66,17 @@ else:
 
     logger.info(f"[DATABASE] Final URL scheme: {url.drivername}")
 
-engine: AsyncEngine = create_async_engine(
-    db_url,
-    future=True,
-    echo=False,
-    connect_args=connect_args,
-    poolclass=NullPool if not url.drivername.startswith("sqlite") else None,
-    ssl=ssl_context,
-)
+engine_kwargs = {
+    "future": True,
+    "echo": False,
+    "connect_args": connect_args,
+    "poolclass": NullPool if not url.drivername.startswith("sqlite") else None,
+}
+
+if not url.drivername.startswith("sqlite") and ssl_context is not None:
+    engine_kwargs["ssl"] = ssl_context
+
+engine: AsyncEngine = create_async_engine(db_url, **engine_kwargs)
 
 AsyncSessionLocal = sessionmaker(
     bind=engine,
