@@ -40,7 +40,11 @@ else:
     
     # Remove sslmode and other incompatible parameters
     if url.query:
-        filtered_query = {k: v for k, v in url.query.items() if k.lower() not in ['sslmode']}
+        filtered_query = {
+            k: v
+            for k, v in url.query.items()
+            if k.lower() not in ['sslmode', 'channel_binding']
+        }
         if filtered_query:
             db_url = url.set(query=filtered_query)
         else:
