@@ -11,7 +11,11 @@ services:
       export PIP_CACHE_DIR=/tmp/pip-cache
       python --version
       pip install --no-cache-dir -r requirements.txt
-    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+      # Run Django migrations and collectstatic during build
+      cd pyf-backend
+      python manage.py migrate --noinput || true
+      python manage.py collectstatic --noinput || true
+    startCommand: gunicorn django_project.wsgi:application --bind 0.0.0.0:$PORT --workers 3
     workingDirectory: pyf-backend
     envVars:
       - key: DATABASE_URL
