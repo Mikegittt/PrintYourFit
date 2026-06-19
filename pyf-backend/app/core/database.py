@@ -66,6 +66,10 @@ else:
 
     logger.info(f"[DATABASE] Final URL scheme: {url.drivername}")
 
+    # If SSL context was created for asyncpg, pass it in connect_args
+    if ssl_context is not None:
+        connect_args['ssl'] = ssl_context
+
 engine_kwargs = {
     "future": True,
     "echo": False,
