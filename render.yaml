@@ -6,15 +6,8 @@ services:
     region: oregon
     plan: free
     branch: main
-    buildCommand: >
-      export CARGO_HOME=/tmp/cargo;
-      export PIP_CACHE_DIR=/tmp/pip-cache;
-      python --version;
-      python -m pip install --no-cache-dir -r requirements.txt;
-      cd pyf-backend;
-      python manage.py migrate --noinput || true;
-      python manage.py collectstatic --noinput || true
-    startCommand: python -m gunicorn django_project.wsgi:application --bind 0.0.0.0:$PORT --workers 3
+    buildCommand: bash -lc "export CARGO_HOME=/tmp/cargo && export PIP_CACHE_DIR=/tmp/pip-cache && python --version && python -m pip install --no-cache-dir -r requirements.txt && cd pyf-backend && python manage.py migrate --noinput || true && python manage.py collectstatic --noinput || true"
+    startCommand: bash -lc "python -m gunicorn django_project.wsgi:application --bind 0.0.0.0:$PORT --workers 3"
     workingDirectory: pyf-backend
     envVars:
       - key: DATABASE_URL
