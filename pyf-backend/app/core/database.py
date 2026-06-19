@@ -78,7 +78,8 @@ engine_kwargs = {
 }
 
 if not url.drivername.startswith("sqlite") and ssl_context is not None:
-    engine_kwargs["ssl"] = ssl_context
+    # SSL is passed via connect_args for asyncpg; do not pass engine-level 'ssl'
+    pass
 
 engine: AsyncEngine = create_async_engine(db_url, **engine_kwargs)
 
