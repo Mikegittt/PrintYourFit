@@ -6,8 +6,6 @@ services:
     region: oregon
     plan: free
     branch: main
-    buildCommand: bash build.sh
-    startCommand: bash start.sh
     workingDirectory: pyf-backend
     envVars:
       - key: DATABASE_URL
