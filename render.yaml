@@ -7,6 +7,8 @@ services:
     plan: free
     branch: main
     workingDirectory: pyf-backend
+    buildCommand: bash build.sh
+    startCommand: bash start.sh
     envVars:
       - key: DATABASE_URL
         fromSecret: DATABASE_URL
